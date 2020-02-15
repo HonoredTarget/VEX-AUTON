@@ -1,0 +1,206 @@
+Copy Paste This in the Main.cpp file:
+#include "robot-config.h"
+
+using namespace std;
+
+//Creates a competition object that allows access to Competition methods.
+vex::competition    Competition;
+vex::controller     Controller;
+
+// distance in degrees
+void move( int distance, int velocity) {
+    frontLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    frontRight.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backRight.rotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    vex::task::sleep(20);
+}
+
+void strafeRight(int distance, int velocity) {
+    frontLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    frontRight.startRotateFor(-1*distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backLeft.startRotateFor(-1*distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backRight.rotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    vex::task::sleep(20);
+}
+
+void strafeLeft(int distance, int velocity) {
+    frontLeft.startRotateFor(-1*distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    frontRight.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backRight.rotateFor(-1*distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    vex::task::sleep(20);
+}
+
+void turnLeft( int distance, int velocity ) {
+    frontLeft.startRotateFor((-1*distance), vex::rotationUnits::deg, (-1*velocity), vex::velocityUnits::pct);
+    frontRight.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backLeft.startRotateFor((-1*distance), vex::rotationUnits::deg, (-1*velocity), vex::velocityUnits::pct);
+    backRight.rotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    vex::task::sleep(20);
+}
+
+void turnRight( int distance, int velocity ) {
+    frontLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    frontRight.startRotateFor((-1*distance), vex::rotationUnits::deg, (-1*velocity), vex::velocityUnits::pct);
+    backLeft.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    backRight.rotateFor((-1*distance), vex::rotationUnits::deg, (-1*velocity), vex::velocityUnits::pct);
+    vex::task::sleep(20);
+}
+
+void turnMotors( int distance, int velocity ) {
+    rightIntake.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    leftIntake.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+}
+
+void turnMotorsWait( int distance, int velocity ) {
+    rightIntake.startRotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+    leftIntake.rotateFor(distance, vex::rotationUnits::deg, velocity, vex::velocityUnits::pct);
+}
+
+void deploy() {
+    turnMotors(-1000, 100);
+    lift.startRotateFor(-300, vex::rotationUnits::deg, 100, vex::velocityUnits::pct);
+    vex::task::sleep(400);
+}
+
+double EdwinTrayCurveV2(double c)
+{
+	double curve;
+	if (c >= 900)
+	{
+		curve = 100 - sqrt(5 * (c - 570));
+	}
+	else
+	{
+		curve = 110 + (0.0000003 * pow((350 - c), 3));
+	}
+	if (curve < 30)
+		curve = 30;
+	if (curve >= 127)
+		curve = 127;
+	return curve*0.60;
+}
+
+
+void dropStack() {
+    turnMotorsWait(-270, 30);
+    turnMotors(20000,12);
+    while(Pot.value(vex::rotationUnits::raw) > 100 ) {
+        titler.spin(vex::directionType::fwd,(100*(EdwinTrayCurveV2(1552-Pot.value(vex::rotationUnits::raw))/127)),vex::velocityUnits::pct);
+    }
+    rightIntake.stop();
+    leftIntake.stop();
+    vex::task::sleep(2000);
+    titler.setTimeout(1,vex::timeUnits::sec);
+    titler.rotateFor(-10000,vex::rotationUnits::deg, 100, vex::velocityUnits::pct);
+    
+    turnMotors(-1000,30);
+    move(-900,20);
+    
+}
+
+void outtakeCube() { // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    turnMotors(-400,50);
+}
+
+// ************************************************************************************************************************** Edit a bit lower in the code buddy unless need to edit outake cubes.
+
+void pre_auton( void ) {}
+
+void autonomous( void ) {
+    frontLeft.stop(vex::brakeType::hold);
+    backLeft.stop(vex::brakeType::hold);
+    frontRight.stop(vex::brakeType::hold);
+    backRight.stop(vex::brakeType::hold);
+    lift.stop(vex::brakeType::hold);
+    
+    deploy();
+    lift.startRotateFor(-12,vex::rotationUnits::deg,20,vex::velocityUnits::pct);
+    turnMotors(99000,100);
+    move(3000,30);
+    //strafeRight(1090,70);
+    //move(-2000,100);
+    rightIntake.stop();
+    leftIntake.stop();
+    turnLeft(330,30);
+    backRight.setTimeout(1,vex::timeUnits::sec);
+    move(1450,100);
+    dropStack();
+    
+    // Edit After This Point
+    strafeRight(200,100);
+    turnLeft(800,100);
+    move(-400,100);
+    strafeLeft(100,100);
+    move(-200,100);
+    turnMotors(20000,100);
+
+    frontLeft.resetRotation();
+    backLeft.resetRotation();
+    frontRight.resetRotation();
+    backRight.resetRotation();
+    // Please do not edit anything above this comment   -------------------------------------------------------------------------------------------------------------------------<<<<
+    
+    // Drive Forward, picking up the 4 cubes in a straight line. This movement is broken up into two lines because of vcs being dumb.
+    move(1200,50);
+    move(1300,50);
+    // move back becuause, I had the other vals calibrated to turn at this area, don't really edit this unless you edit the lines directly above this comment.
+    move(-100,50);
+    // stop intakes.
+    rightIntake.stop();
+    leftIntake.stop();
+
+    // Turn in a hopefully 90 deg angle. In this case, the 550 is the turn, and the 80 means 80% velocity. This strucure applies to many of my mother functions.
+    turnRight(550,80);
+    // Strafe to allign with the tower
+    strafeRight(350,80);
+    
+    // Move the lift up in position to then be able to drive and then drop the cube. Only edit the 1100 for lift height. 100 is velocity.
+    lift.resetRotation();
+    lift.rotateFor(1100,vex::rotationUnits::deg,100,vex::velocityUnits::pct);
+
+    // Same deal with splitting the lines of code, move forward and run into the wall.
+    move(2000,20);
+    move(2000,20);
+    // Backup for alignment with the tower. 
+    move(-100,20);
+    // Outtake  cube, edit the area with a $$$$$$$$$ line if outakes too far
+    outtakeCube();
+    // Move back from the hopefull scored tower.
+    move(-400,40);
+    // Turn hopefully left 90 alligning with the second tower.
+    turnLeft(550,80);
+    // Drive into the tower
+    move(2000,20);
+    // Move back from the tower
+    move(-100,20);
+    // Spit out cube.
+    outtakeCube();
+    
+    frontLeft.stop(vex::brakeType::coast);
+    backLeft.stop(vex::brakeType::coast);
+    frontRight.stop(vex::brakeType::coast);
+    backRight.stop(vex::brakeType::coast);
+}
+
+void usercontrol( void ) {
+}
+
+int main() {
+    
+    //Run the pre-autonomous function. 
+    pre_auton();
+    
+    //Set up callbacks for autonomous and driver control periods.
+    Competition.autonomous( autonomous );
+    Competition.drivercontrol( usercontrol );
+
+    //Prevent main from exiting with an infinite loop.                        
+    while(1) {
+      vex::task::sleep(100);//Sleep the task for a short amount of time to prevent wasted resources.
+    }    
+       
+}
+
+And This in the robot-config.h file
