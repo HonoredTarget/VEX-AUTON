@@ -1,10 +1,23 @@
-#include "robot-config.h"
+#include "vex.h"
+
+using namespace vex;
 
 using namespace std;
 
 //Creates a competition object that allows access to Competition methods.
 vex::competition    Competition;
 vex::controller     Controller;
+
+vex::motor lift = vex::motor(vex::PORT6, vex::gearSetting::ratio36_1);
+vex::motor backLeft = vex::motor(vex::PORT1, vex::gearSetting::ratio18_1);
+vex::motor frontLeft = vex::motor(vex::PORT5, vex::gearSetting::ratio18_1, true);
+vex::motor backRight = vex::motor(vex::PORT9, vex::gearSetting::ratio18_1, true);
+vex::motor frontRight = vex::motor(vex::PORT8, vex::gearSetting::ratio18_1);
+vex::motor rightIntake = vex::motor(vex::PORT10, vex::gearSetting::ratio18_1, true);
+vex::motor leftIntake = vex::motor(vex::PORT7, vex::gearSetting::ratio18_1);
+vex::motor titler = vex::motor(vex::PORT4, vex::gearSetting::ratio36_1);
+
+vex::pot Pot = vex::pot(Brain.ThreeWirePort.G);
 
 // distance in degrees
 void move( int distance, int velocity) {
@@ -189,7 +202,7 @@ void usercontrol( void ) {
 int main() {
     
     //Run the pre-autonomous function. 
-    pre_auton();
+    vexcodeInit();
     
     //Set up callbacks for autonomous and driver control periods.
     Competition.autonomous( autonomous );
@@ -201,3 +214,4 @@ int main() {
     }    
        
 }
+  
