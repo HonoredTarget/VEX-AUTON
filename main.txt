@@ -1,4 +1,3 @@
-Copy Paste This in the Main.cpp file:
 #include "robot-config.h"
 
 using namespace std;
