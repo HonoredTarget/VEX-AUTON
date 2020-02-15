@@ -7,3 +7,4 @@
   5. Start editing values. Read the comments before edititng values, and MAKE SURE THAT THE CODE IS BEING UPLOADED TO THE SECOND SLOT
   
 # Put it in the second slot
+On the top of the middle next to the name, there is a number eg 1, 2, 3. MAKE SURE THAT IT IS 2
